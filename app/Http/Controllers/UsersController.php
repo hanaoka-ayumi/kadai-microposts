@@ -62,4 +62,34 @@ class UsersController extends Controller
 
         return view('users.followers', $data);
     }
+    
+   public function feed_microposts()
+    {
+        $follow_user_ids = $this->followings()-> pluck('users.id')->toArray();
+        $follow_user_ids[] = $this->id;
+        return Micropost::whereIn('user_id', $follow_user_ids);
+        
+         $favorite_user_ids = $this->favoriting()-> pluck('users.id')->toArray();
+        $favorite_user_ids[] = $this->id;
+        return Micropost::whereIn('user_id', $favorite_user_ids);
+        
+    }
+    
+     public function favoriting($id)
+    {
+        $user = User::find($id);
+        $favoriting = $user->favoriting()->paginate(10);
+
+        $data = [
+            'user' => $user,
+            'microposts' => $favoriting,
+        ];
+
+        $data += $this->counts($user);
+
+        return view('users.favoriting', $data);
+    }
+
+    
+
 }
